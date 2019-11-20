@@ -34,11 +34,13 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Ses
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.FrameworkException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.LogoutFailedException;
+import org.wso2.carbon.identity.application.authentication.framework.exception.UserSessionException;
 import org.wso2.carbon.identity.application.authentication.framework.handler.request.LogoutRequestHandler;
 import org.wso2.carbon.identity.application.authentication.framework.internal.FrameworkServiceDataHolder;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationResult;
 import org.wso2.carbon.identity.application.authentication.framework.model.CommonAuthResponseWrapper;
+import org.wso2.carbon.identity.application.authentication.framework.store.UserSessionStore;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
@@ -97,7 +99,13 @@ public class DefaultLogoutRequestHandler implements LogoutRequestHandler {
                                 .SESSION_TERMINATE);
             }
         }
-
+        // Remove federated authentication session details for the session context key.
+        try {
+            UserSessionStore.getInstance().removeSessionData(context.getSessionIdentifier());
+        } catch (UserSessionException e) {
+            // TODO: 11/20/19 message 
+            throw new FrameworkException("Exception while  logout request", e);
+        }
         // remove SessionContext from the cache and auth cookie before sending logout request to federated IDP,
         // without waiting till a logout response is received from federated IDP.
         // remove the SessionContext from the cache

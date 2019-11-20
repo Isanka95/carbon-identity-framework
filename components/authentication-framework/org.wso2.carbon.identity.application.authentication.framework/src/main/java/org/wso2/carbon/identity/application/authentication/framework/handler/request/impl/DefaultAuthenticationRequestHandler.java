@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthHistory;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
+import org.wso2.carbon.identity.application.authentication.framework.dao.impl.UserSessionDAOImpl;
 import org.wso2.carbon.identity.application.authentication.framework.exception.DuplicatedAuthUserException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.FrameworkException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.UserSessionException;
@@ -70,6 +71,8 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Authenticator.SAML2SSO.FED_AUTH_NAME;
 
 public class DefaultAuthenticationRequestHandler implements AuthenticationRequestHandler {
 
@@ -471,6 +474,19 @@ public class DefaultAuthenticationRequestHandler implements AuthenticationReques
                             "the database", e);
                 }
             }
+            // Check whether the authentication flow includes a federated IdP and then
+            // store the federated idp index with the session context key.
+            for (AuthHistory authHistory : context.getAuthenticationStepHistory()) {
+                if ((FED_AUTH_NAME).equals(authHistory.getAuthenticatorName())) {
+                    try {
+                        UserSessionStore.getInstance().storeFederatedAuthSessionData(sessionContextKey, authHistory);
+                    } catch (UserSessionException e) {
+                        throw new FrameworkException("Error while storing federated authentication session details of "
+                                + "the authenticated user to the database", e);
+                    }
+                }
+            }
+
         }
 
         // Checking weather inbound protocol is an already cache removed one, request come from federated or other
