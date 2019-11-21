@@ -29,6 +29,7 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.config.model.ExternalIdPConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthHistory;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
@@ -50,6 +51,8 @@ import java.net.URLEncoder;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Authenticator.SAML2SSO.FED_AUTH_NAME;
 
 public class DefaultLogoutRequestHandler implements LogoutRequestHandler {
 
@@ -100,11 +103,16 @@ public class DefaultLogoutRequestHandler implements LogoutRequestHandler {
             }
         }
         // Remove federated authentication session details for the session context key.
-        try {
-            UserSessionStore.getInstance().removeSessionData(context.getSessionIdentifier());
-        } catch (UserSessionException e) {
-            // TODO: 11/20/19 message 
-            throw new FrameworkException("Exception while  logout request", e);
+        for (AuthHistory authHistory : context.getAuthenticationStepHistory()) {
+            if ((FED_AUTH_NAME).equals(authHistory.getAuthenticatorName())) {
+                try {
+                    UserSessionStore.getInstance().removeSessionData(context.getSessionIdentifier());
+                    break;
+                } catch (UserSessionException e) {
+                    throw new FrameworkException("Error while deleting federated authentication session details for " +
+                            "the session contect key :" + context.getSessionIdentifier(), e);
+                }
+            }
         }
         // remove SessionContext from the cache and auth cookie before sending logout request to federated IDP,
         // without waiting till a logout response is received from federated IDP.
