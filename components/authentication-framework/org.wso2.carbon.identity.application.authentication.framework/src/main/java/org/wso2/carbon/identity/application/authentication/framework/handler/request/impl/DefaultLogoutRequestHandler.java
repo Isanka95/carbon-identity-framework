@@ -48,11 +48,13 @@ import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Authenticator.SAML2SSO.FED_AUTH_NAME;
+import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Authenticator.
+        SAML2SSO.FED_AUTH_NAME;
 
 public class DefaultLogoutRequestHandler implements LogoutRequestHandler {
 
@@ -102,18 +104,19 @@ public class DefaultLogoutRequestHandler implements LogoutRequestHandler {
                                 .SESSION_TERMINATE);
             }
         }
-        // Remove federated authentication session details for the session context key.
-        for (AuthHistory authHistory : context.getAuthenticationStepHistory()) {
-            if ((FED_AUTH_NAME).equals(authHistory.getAuthenticatorName())) {
-                try {
-                    UserSessionStore.getInstance().removeSessionData(context.getSessionIdentifier());
-                    break;
-                } catch (UserSessionException e) {
-                    throw new FrameworkException("Error while deleting federated authentication session details for " +
-                            "the session contect key :" + context.getSessionIdentifier(), e);
-                }
+
+        // Remove federated authentication session details of the session context key from the database.
+        ArrayList<AuthHistory> authHistoryList = (ArrayList<AuthHistory>) context.getAuthenticationStepHistory();
+        if (authHistoryList.stream().anyMatch(
+                authHistory -> (FED_AUTH_NAME).equals(authHistory.getAuthenticatorName()))) {
+            try {
+                UserSessionStore.getInstance().removeSessionData(context.getSessionIdentifier());
+            } catch (UserSessionException e) {
+                throw new FrameworkException("Error while deleting federated authentication session details of " +
+                        "the session context key :" + context.getSessionIdentifier(), e);
             }
         }
+
         // remove SessionContext from the cache and auth cookie before sending logout request to federated IDP,
         // without waiting till a logout response is received from federated IDP.
         // remove the SessionContext from the cache

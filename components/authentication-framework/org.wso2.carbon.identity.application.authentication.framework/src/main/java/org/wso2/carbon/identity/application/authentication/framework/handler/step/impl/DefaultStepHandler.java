@@ -57,7 +57,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Authenticator.SAML2SSO.FED_AUTH_NAME;
+import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.Authenticator.
+        SAML2SSO.FED_AUTH_NAME;
+
 import static org.wso2.carbon.identity.base.IdentityConstants.FEDERATED_IDP_SESSION_ID;
 
 public class DefaultStepHandler implements StepHandler {
@@ -559,6 +561,7 @@ public class DefaultStepHandler implements StepHandler {
             //add authenticated idp data to the session wise map
             context.getCurrentAuthenticatedIdPs().put(idpName, authenticatedIdPData);
 
+            // Add SAML federated idp session index into the authentication step history.
             if (FED_AUTH_NAME.equals(context.getCurrentAuthenticator())) {
                 context.addAuthenticationStepHistory(new AuthHistory(authenticator.getName(), idpName,
                         context.getParameter(FEDERATED_IDP_SESSION_ID + context.getExternalIdP().
