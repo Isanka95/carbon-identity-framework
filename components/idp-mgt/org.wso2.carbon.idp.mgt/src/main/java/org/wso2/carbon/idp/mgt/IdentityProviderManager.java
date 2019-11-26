@@ -1044,6 +1044,22 @@ public class IdentityProviderManager implements IdpManager {
     }
 
     /**
+     * Get all basic identity provider information.
+     *
+     * @param filter       filter value for IdP search.
+     * @param tenantDomain tenant domain whose IdP names are requested.
+     * @return filtered idp count.
+     * @throws IdentityProviderManagementException Error while getting Identity  Providers count.IdentityProviderManagementService.java
+     */
+    @Override
+    public int getTotalIdPCount(String filter, String tenantDomain) throws IdentityProviderManagementException {
+
+        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+        List<ExpressionNode> expressionNodes = getExpressionNodes(filter);
+        return dao.getTotalIdPCount(tenantId, expressionNodes);
+    }
+
+    /**
      * Get the filter node as a list.
      *
      * @param filter value of the filter.
@@ -2250,7 +2266,7 @@ public class IdentityProviderManager implements IdpManager {
         List<ProvisioningConnectorConfig> connectorConfigs = ProvisioningConnectorService
                 .getInstance().getProvisioningConnectorConfigs();
         if (connectorConfigs != null && connectorConfigs.size() > 0) {
-            return connectorConfigs.toArray(new ProvisioningConnectorConfig[connectorConfigs.size()]);
+            return connectorConfigs.toArray(new ProvisioningConnectorConfig[0]);
         }
         return null;
     }
