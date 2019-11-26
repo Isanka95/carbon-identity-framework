@@ -119,7 +119,7 @@
     boolean isSLOEnabled = false;
     boolean isLogoutRequestSigned = false;
     String logoutUrl = null;
-    boolean isSLORequestAccepted =false;
+    boolean isSLORequestAccepted = false;
     boolean isAuthnResponseSigned = false;
     boolean isSAMLSSOUserIdInClaims = false;
     boolean isOIDCEnabled = false;
@@ -995,10 +995,8 @@
     }
 
     String sloRequestAcceptedChecked = "";
-    if (identityProvider != null) {
-        if (isSLORequestAccepted) {
-            sloRequestAcceptedChecked = "checked=\'checked\'";
-        }
+    if (identityProvider != null && isSLORequestAccepted) {
+        sloRequestAcceptedChecked = "checked=\'checked\'";
     }
 
     String logoutRequestSignedChecked = "";
@@ -4004,8 +4002,8 @@
                                             <input id="sloRequestAccepted" name="sloRequestAccepted"
                                                    type="checkbox" <%=sloRequestAcceptedChecked%>/>
                                             <span style="display:inline-block" class="sectionHelp">
-                                    <fmt:message key='slo.request.accepted.help'/>
-                                </span>
+                                                    <fmt:message key='slo.request.accepted.help'/>
+                                            </span>
                                         </div>
                                     </td>
                                 </tr>
