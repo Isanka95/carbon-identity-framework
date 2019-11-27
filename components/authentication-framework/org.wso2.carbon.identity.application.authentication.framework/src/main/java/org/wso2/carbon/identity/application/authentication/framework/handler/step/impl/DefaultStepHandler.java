@@ -563,8 +563,7 @@ public class DefaultStepHandler implements StepHandler {
 
             // Add SAML federated idp session index into the authentication step history.
             String idpSessionIndex = null;
-            String parameterName = FEDERATED_IDP_SESSION_ID + context.getExternalIdP().getIdentityProvider().
-                    getIdentityProviderName();
+            String parameterName = FEDERATED_IDP_SESSION_ID + idpName;
             AuthHistory authHistory = new AuthHistory(authenticator.getName(), idpName);
 
             if (context.getParameters().containsKey(parameterName)) {
